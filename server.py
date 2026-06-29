@@ -130,6 +130,31 @@ class PhotoUploadResponse(BaseModel):
     photo_url: str
     path: str
 
+
+# Health check endpoints
+@app.get("/")
+async def root():
+    return {
+        "service": "Car Inspection Pro API",
+        "status": "running",
+        "version": "1.0.0"
+    }
+
+@app.get("/health")
+async def health_check():
+    try:
+        await db.command("ping")
+        return {
+            "status": "healthy",
+            "database": "connected"
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e)
+        }
+
 @api_router.post("/inspections", response_model=CarInspection)
 async def create_inspection(input: CarInspectionCreate):
     inspection_dict = input.model_dump()
